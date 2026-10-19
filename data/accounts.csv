@@ -1,0 +1,13 @@
+account_id,name,sector,employees,country,ai_maturity,regulated
+A01,Nordbank,banking,8500,BE,3,yes
+A02,Helios Insurance,insurance,4200,NL,2,yes
+A03,Brabant Logistics,logistics,1800,NL,1,no
+A04,Meridian Health Group,healthcare,6100,BE,2,yes
+A05,Corvus Manufacturing,manufacturing,950,BE,1,no
+A06,Atlas Asset Management,asset_management,1200,LU,3,yes
+A07,Polder Energy,energy,3300,NL,2,yes
+A08,Kestrel Retail,retail,7400,BE,2,no
+A09,Vega Pharma,pharma,5200,CH,3,yes
+A10,Tiny Studio,marketing,40,BE,1,no
+A11,Sable Telecom,telecom,9800,NL,3,yes
+A12,Orion Public Services,public_sector,2600,BE,1,yes

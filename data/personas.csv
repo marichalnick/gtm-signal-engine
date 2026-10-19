@@ -1,0 +1,17 @@
+account_id,name,title,role
+A01,Anna Peeters,Chief AI Officer,strategic_buyer
+A01,Marc De Smet,CISO,governance
+A01,Lotte Janssens,Head of AI Platform,technical_evaluator
+A02,Pieter van Dijk,CISO,governance
+A02,Eva Bakker,Head of Data & AI,strategic_buyer
+A04,Sofie Claes,CIO,economic_buyer
+A04,Tom Wouters,DPO,governance
+A06,Julien Weber,Chief Risk Officer,governance
+A06,Clara Muller,CTO,technical_evaluator
+A07,Ruben de Vries,Head of IT Security,governance
+A08,Nina Verbeke,CDO,strategic_buyer
+A09,Lukas Meier,Head of AI Governance,governance
+A09,Mia Keller,CIO,economic_buyer
+A11,Daan Visser,CISO,governance
+A11,Iris Smit,VP Engineering,technical_evaluator
+A12,Koen Maes,CIO,economic_buyer

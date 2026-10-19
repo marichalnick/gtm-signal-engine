@@ -1,0 +1,42 @@
+[
+ {
+  "account_id": "A01",
+  "type": "ai_rollout",
+  "date": "2026-10-14",
+  "headline": "Nordbank rolls out AI assistants to 6,000 employees",
+  "url": "https://example.com/news/nordbank-ai",
+  "primary_source": true,
+  "topic": "the rollout of AI assistants to 6,000 employees",
+  "opener": "Nordbank is rolling out AI assistants to 6,000 employees"
+ },
+ {
+  "account_id": "A08",
+  "type": "ai_rollout",
+  "date": "2026-06-02",
+  "headline": "Kestrel Retail pilots AI agents in customer service",
+  "url": "https://example.com/news/kestrel-agents",
+  "primary_source": false,
+  "topic": "the AI agent pilot in customer service",
+  "opener": "Kestrel is piloting AI agents in customer service"
+ },
+ {
+  "account_id": "A11",
+  "type": "new_exec",
+  "date": "2026-10-07",
+  "headline": "Sable Telecom appoints new CISO",
+  "url": "https://example.com/news/sable-ciso",
+  "primary_source": true,
+  "topic": "your new role as CISO",
+  "opener": "you recently joined Sable Telecom as CISO"
+ },
+ {
+  "account_id": "A10",
+  "type": "ai_rollout",
+  "date": "2026-10-12",
+  "headline": "Tiny Studio launches AI image tool for clients",
+  "url": "https://example.com/news/tiny-ai",
+  "primary_source": true,
+  "topic": "the new AI image tool",
+  "opener": "Tiny Studio launched an AI image tool"
+ }
+]

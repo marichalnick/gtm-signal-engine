@@ -1,0 +1,22 @@
+[
+ {
+  "account_id": "A02",
+  "type": "hiring_ai_governance",
+  "date": "2026-10-09",
+  "headline": "Helios Insurance hiring: AI Governance Lead",
+  "url": "https://example.com/jobs/helios-ai-gov",
+  "primary_source": true,
+  "topic": "an AI Governance Lead",
+  "opener": "Helios is hiring an AI Governance Lead"
+ },
+ {
+  "account_id": "A07",
+  "type": "hiring_ai_governance",
+  "date": "2026-09-30",
+  "headline": "Polder Energy hiring: AI Security Engineer",
+  "url": "https://example.com/jobs/polder-ai-sec",
+  "primary_source": true,
+  "topic": "an AI Security Engineer",
+  "opener": "Polder Energy is hiring an AI Security Engineer"
+ }
+]

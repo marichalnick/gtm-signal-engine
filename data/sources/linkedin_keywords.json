@@ -1,0 +1,22 @@
+[
+ {
+  "account_id": "A09",
+  "type": "keyword_post",
+  "date": "2026-10-16",
+  "headline": "Head of AI Governance at Vega Pharma posts: 'Our biggest gap is knowing what our agents actually do.'",
+  "url": "https://example.com/post/vega",
+  "primary_source": true,
+  "topic": "your post on agent visibility",
+  "opener": "your post about agent visibility"
+ },
+ {
+  "account_id": "A05",
+  "type": "keyword_post",
+  "date": "2026-10-10",
+  "headline": "Rumour in a comment thread: Corvus 'probably' starting with AI",
+  "url": "https://example.com/post/corvus",
+  "primary_source": false,
+  "topic": "AI plans",
+  "opener": "Corvus may be starting with AI"
+ }
+]

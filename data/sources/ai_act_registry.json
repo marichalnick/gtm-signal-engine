@@ -1,0 +1,22 @@
+[
+ {
+  "account_id": "A04",
+  "type": "ai_act_registration",
+  "date": "2026-10-01",
+  "headline": "Meridian Health Group registers a high-risk AI system (triage support)",
+  "url": "https://example.com/registry/meridian",
+  "primary_source": true,
+  "topic": "the triage-support system",
+  "opener": "Meridian registered its triage-support AI as a high-risk system"
+ },
+ {
+  "account_id": "A06",
+  "type": "ai_act_registration",
+  "date": "2026-07-15",
+  "headline": "Atlas Asset Management registers credit-scoring AI system",
+  "url": "https://example.com/registry/atlas",
+  "primary_source": true,
+  "topic": "the credit-scoring system",
+  "opener": "Atlas registered its credit-scoring AI as a high-risk system"
+ }
+]
