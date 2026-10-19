@@ -1,0 +1,191 @@
+{
+  "name": "Signal Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "ad8b8cfe-d094-4d06-85d0-dfabc99591e4",
+      "name": "Every morning 8:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d0be6b9a-a9ae-45ad-841d-fede5b3564a2",
+      "name": "Test run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Watchlist: one Google News RSS query per theme or account.\n// Edit this list to track your own accounts. No API key needed.\nconst watchlist = [\n  { watch: \"New security leader\",     query: 'appoints CISO OR \"chief information security officer\" Belgium OR Netherlands' },\n  { watch: \"AI rollout in finance\",   query: 'bank OR insurer \"rolls out\" AI assistants Europe' },\n  { watch: \"AI Act readiness\",        query: '\"AI Act\" compliance bank OR insurer' },\n  { watch: \"Belgian scale-up funding\",query: 'Belgian startup raises \"Series A\" OR \"Series B\"' },\n  { watch: \"AI governance hiring\",    query: '\"AI governance\" lead OR head hiring Europe' },\n  // Add accounts the same way, e.g.:\n  // { watch: \"Acme Bank\", query: '\"Acme Bank\" AI OR CISO OR funding' },\n];\n\nreturn watchlist.map(w => ({\n  json: {\n    watch: w.watch,\n    query: w.query,\n    url: \"https://news.google.com/rss/search?q=\" + encodeURIComponent(w.query) + \"&hl=en&gl=BE&ceid=BE:en\",\n  },\n}));\n"
+      },
+      "id": "16bc9885-cf74-45e9-8cd1-43124048c7bc",
+      "name": "Watchlist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "id": "e5d3b276-8902-4d46-9f71-f35c8e70d3fb",
+      "name": "Read news (RSS)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        100
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Classify each article into a trigger type and score it.\n// score = trigger strength x recency decay (half-life 21 days).\nconst HALF_LIFE_DAYS = 21;\nconst MAX_AGE_DAYS = 90;\n\nconst TRIGGERS = [\n  { type: \"new_exec\",      strength: 0.8,  re: /\\b(appoint(s|ed)?|names?|hires?|joins? as|new)\\b.*\\b(CISO|CIO|CTO|CDO|CRO|chief|head of)\\b/i },\n  { type: \"funding_ma\",    strength: 0.8,  re: /\\b(raises?|funding|series [a-e]|acquires?|acquisition|merger)\\b/i },\n  { type: \"ai_rollout\",    strength: 0.9,  re: /\\b(rolls? out|deploys?|launch(es)?|pilot(s)?|adopts?)\\b.*\\b(AI|copilot|agent|GenAI|LLM)\\b/i },\n  { type: \"hiring\",        strength: 0.75, re: /\\b(hiring|vacanc|job opening|recruit)\\b/i },\n  { type: \"breach_incident\", strength: 0.85, re: /\\b(breach|cyber ?attack|incident|ransomware|outage)\\b/i },\n  { type: \"regulation\",    strength: 0.5,  re: /\\b(AI Act|DORA|NIS2|GDPR|regulat|fine[sd]?)\\b/i },\n];\n\nconst now = Date.now();\n\nconst out = [];\nconst input = $input.all();\nfor (let i = 0; i < input.length; i++) {\n  const item = input[i];\n  const a = item.json;\n  if (!a.title) continue;                       // failed feed or empty item\n  const text = `${a.title} ${a.contentSnippet || \"\"}`;\n\n  const trig = TRIGGERS.find(t => t.re.test(text));\n  if (!trig) continue;                           // news, but not a trigger\n\n  const published = new Date(a.isoDate || a.pubDate || now).getTime();\n  const ageDays = Math.max(0, Math.round((now - published) / 86400000));\n  if (ageDays > MAX_AGE_DAYS) continue;          // context, not a trigger\n\n  const decay = Math.pow(0.5, ageDays / HALF_LIFE_DAYS);\n  // Which watchlist query produced this article? Follow n8n's item linking back to the Watchlist node.\n  let watch = \"unknown\";\n  try { watch = $('Watchlist').itemMatching(i).json.watch; } catch (e) {}\n\n  // Google News titles end with \" - Source name\". The source is secondary until a human checks the primary source.\n  const source = (a.title.match(/ - ([^-]+)$/) || [])[1] || \"unknown\";\n\n  out.push({\n    json: {\n      watch,\n      trigger: trig.type,\n      title: a.title,\n      story: a.title.replace(/ - [^-]+$/, \"\").toLowerCase().replace(/[^a-z0-9 ]/g, \"\").split(\" \").slice(0, 4).join(\" \"),\n      link: a.link,\n      source,\n      published: new Date(published).toISOString().slice(0, 10),\n      age_days: ageDays,\n      score: Math.round(trig.strength * decay * 100),\n      verification: \"secondary (news): check the primary source before using in outreach\",\n    },\n  });\n}\nreturn out;\n"
+      },
+      "id": "d78b3085-35d3-45c1-bedb-e21e49fd6e65",
+      "name": "Classify & score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Remove duplicates within this run AND across runs, then keep the best signals.\n// Cross-run memory uses workflow static data. It is only used on scheduled runs,\n// so manual test runs always show the full result.\nconst MIN_SCORE = 30;\nconst TOP_N = 15;\n\nconst scheduled = $execution.mode === 'trigger';\nconst memory = scheduled ? $getWorkflowStaticData('global') : {};\nmemory.seen = memory.seen || {};\n\n// Highest score first, so when the same story appears in several outlets we keep the best one.\nconst sorted = $input.all().sort((a, b) => b.json.score - a.json.score);\nconst seenNow = new Set();\nconst fresh = [];\nfor (const item of sorted) {\n  const key = item.json.link || item.json.title;\n  const story = item.json.story;            // same story, different outlet\n  if (seenNow.has(key) || seenNow.has(story) || memory.seen[key]) continue;\n  seenNow.add(key); seenNow.add(story);\n  if (item.json.score < MIN_SCORE) continue;\n  fresh.push(item);\n}\n\n// Remember what we reported, and forget entries older than 120 days.\nconst today = new Date().toISOString().slice(0, 10);\nfor (const i of fresh) memory.seen[i.json.link || i.json.title] = today;\nconst cutoff = new Date(Date.now() - 120 * 86400000).toISOString().slice(0, 10);\nfor (const [k, d] of Object.entries(memory.seen)) if (d < cutoff) delete memory.seen[k];\n\nreturn fresh\n  .sort((a, b) => b.json.score - a.json.score)\n  .slice(0, TOP_N);\n"
+      },
+      "id": "acba0a16-46a2-4467-8e3d-b9a674764142",
+      "name": "Dedupe & rank",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build a daily digest in Markdown and HTML (one output item).\nconst items = $input.all().map(i => i.json);\nconst date = new Date().toISOString().slice(0, 10);\n\nif (items.length === 0) {\n  return [{ json: { date, count: 0, markdown: `# Signal digest ${date}\\n\\nNo new signals above the threshold today.`, html: `<h2>Signal digest ${date}</h2><p>No new signals above the threshold today.</p>` } }];\n}\n\nconst md = [\n  `# Signal digest ${date}`,\n  ``,\n  `${items.length} new signal(s). All come from news coverage: **verify the primary source before using one in outreach.**`,\n  ``,\n  `| Score | Watch | Trigger | Age | Headline |`,\n  `|---:|---|---|---:|---|`,\n  ...items.map(s => `| ${s.score} | ${s.watch} | ${s.trigger} | ${s.age_days}d | [${s.title.replace(/\\|/g, \"/\")}](${s.link}) |`),\n].join(\"\\n\");\n\nconst esc = s => String(s).replace(/&/g, \"&amp;\").replace(/</g, \"&lt;\");\nconst html = `<h2>Signal digest ${date}</h2>\n<p>${items.length} new signal(s). Verify the primary source before using one in outreach.</p>\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\">\n<tr><th>Score</th><th>Watch</th><th>Trigger</th><th>Age</th><th>Headline</th></tr>\n${items.map(s => `<tr><td>${s.score}</td><td>${esc(s.watch)}</td><td>${s.trigger}</td><td>${s.age_days}d</td><td><a href=\"${esc(s.link)}\">${esc(s.title)}</a></td></tr>`).join(\"\\n\")}\n</table>`;\n\nreturn [{ json: { date, count: items.length, markdown: md, html } }];\n"
+      },
+      "id": "91ec5a99-0ef4-437a-9b37-936423234a49",
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Signal Monitor\nDaily news triggers for a watchlist, scored by trigger strength x recency (half-life 21 days).\n\n- No API keys: public Google News RSS.\n- Edit the queries in **Watchlist**.\n- News is a secondary source: verify the primary source before using a signal in outreach.\n- Output: Markdown + HTML digest in **Build digest**. Add an email or Slack node after it if you want delivery.",
+        "height": 220,
+        "width": 520
+      },
+      "id": "06036b0f-4a6a-417a-ab7c-ffca4d83e5cd",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -260
+      ]
+    }
+  ],
+  "connections": {
+    "Every morning 8:00": {
+      "main": [
+        [
+          {
+            "node": "Watchlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test run": {
+      "main": [
+        [
+          {
+            "node": "Watchlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Watchlist": {
+      "main": [
+        [
+          {
+            "node": "Read news (RSS)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read news (RSS)": {
+      "main": [
+        [
+          {
+            "node": "Classify & score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify & score": {
+      "main": [
+        [
+          {
+            "node": "Dedupe & rank",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe & rank": {
+      "main": [
+        [
+          {
+            "node": "Build digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

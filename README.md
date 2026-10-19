@@ -44,6 +44,12 @@ This engine addresses all three, and keeps a human in charge of every message.
 | 7 | **Human review** | Nothing is sent automatically. Approve, edit or reject. | `output/drafts.md` |
 | 8 | **Attribution** | Reply and meeting rate per trigger, angle and call to action. | `engine/report.py` |
 
+## Daily monitoring (n8n)
+
+[`n8n/`](n8n/) contains **Signal Monitor**, an importable n8n workflow that runs this logic every morning on public news feeds (no API keys) and produces a digest of new, scored triggers. It is the scheduled front door; the Python engine is the full pipeline.
+
+![Signal Monitor in n8n](n8n/screenshot.png)
+
 ## Example output
 
 **Shortlist** (`output/shortlist.md`)
@@ -105,7 +111,7 @@ This repo is a clean reimplementation of what I learned in real outbound work:
 | Step | Tools I use |
 |---|---|
 | Accounts & contacts | Apollo, LeadIQ, Clay |
-| Signal monitoring | Claude scheduled tasks |
+| Signal monitoring | Claude scheduled tasks, n8n |
 | Research & buying committee | Claude, LinkedIn (manual) |
 | Tracking & dossiers | Notion, Excel |
 
@@ -122,7 +128,7 @@ The demo replaces each of these with a local file, so anyone can run it.
 - Weights and thresholds are hand-set, not learned from data.
 - Ten synthetic historical touches are a demonstration, not evidence.
 - Drafts are template-based. An LLM can replace `messaging.py`, but a human should still approve every message.
-- No scheduler: in practice this runs daily (Claude scheduled tasks, cron or n8n).
+- The n8n monitor classifies headlines with keyword rules: transparent, but it misses nuance.
 
 ## Next steps
 
